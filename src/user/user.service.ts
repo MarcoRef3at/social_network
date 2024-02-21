@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../models/user.model';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -9,7 +10,8 @@ export class UserService {
     private userModel: typeof User,
   ) {}
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.findAll();
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const user = new this.userModel(createUserDto);
+    return user.save();
   }
 }

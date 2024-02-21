@@ -1,9 +1,10 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import { UserInterface } from 'src/user/interface/user.interface';
 
 @Table({
   tableName: 'users',
 })
-export class User extends Model<User> {
+export class User extends Model<User> implements UserInterface {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
@@ -17,19 +18,4 @@ export class User extends Model<User> {
     allowNull: false,
   })
   fullName: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-    unique: true,
-  })
-  email: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
-  password: string;
-
-  // Define other columns as needed
 }
