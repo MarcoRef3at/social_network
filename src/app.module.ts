@@ -3,8 +3,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-console.log('env', process.env);
-
 @Module({
   imports: [
     SequelizeModule.forRoot({
