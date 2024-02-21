@@ -25,6 +25,6 @@ COPY package*.json ./
 # Install only production dependencies
 RUN npm install --only=production
 
-EXPOSE 3000
+EXPOSE 8080
 
 CMD ["node", "dist/main"]
