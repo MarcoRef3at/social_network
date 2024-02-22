@@ -6,6 +6,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { UserFollows } from './userFollows.model';
+import { UserFriends } from './userFriends.model';
 
 @Table({
   tableName: 'users',
@@ -30,4 +31,7 @@ export class User extends Model<User> {
 
   @BelongsToMany(() => User, () => UserFollows, 'userId', 'followerId')
   followers: User[];
+
+  @BelongsToMany(() => User, () => UserFriends, 'userId', 'friendId')
+  friends: User[];
 }

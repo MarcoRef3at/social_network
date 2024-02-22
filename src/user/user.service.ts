@@ -4,6 +4,7 @@ import { Op } from 'sequelize';
 import { UserFollows } from 'src/models/userFollows.model';
 import { User } from '../models/user.model';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserFriends } from 'src/models/userFriends.model';
 
 @Injectable()
 export class UserService {
@@ -12,18 +13,15 @@ export class UserService {
     private userModel: typeof User,
     @InjectModel(UserFollows)
     private userFollowsModel: typeof UserFollows,
+    @InjectModel(UserFriends)
+    private userFriendsModel: typeof UserFriends,
   ) {}
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const user = new this.userModel(createUserDto);
-    return user.save();
-  }
-
-  async followUser(userId: number, followerId: number): Promise<any> {
+  private async validateUsersExistence(user1Id: number, user2Id: number) {
     const usersExists = await this.userModel.findAll({
       where: {
         id: {
-          [Op.or]: [userId, followerId],
+          [Op.or]: [user1Id, user2Id],
         },
       },
     });
@@ -34,6 +32,15 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const user = new this.userModel(createUserDto);
+    return user.save();
+  }
+
+  async followUser(userId: number, followerId: number): Promise<any> {
+    await this.validateUsersExistence(userId, followerId);
 
     if (userId === followerId) {
       throw new HttpException(
@@ -63,6 +70,43 @@ export class UserService {
       userId,
       followerId,
     });
+    return { message: 'Successfully completed the operation.' };
+  }
+
+  async addFriend(userId: number, friendId: number): Promise<any> {
+    await this.validateUsersExistence(userId, friendId);
+
+    if (userId === friendId) {
+      throw new HttpException(
+        {
+          message: 'Bad Request',
+          messageDetails: 'Users cannot be friends with themselves.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const existingFriendship = await this.userFriendsModel.findOne({
+      where: {
+        [Op.or]: [
+          { userId, friendId },
+          { userId: friendId, friendId: userId },
+        ],
+      },
+    });
+
+    if (existingFriendship) {
+      throw new HttpException(
+        {
+          message: 'Bad Request',
+          messageDetails: 'Users are already friends.',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.userFriendsModel.create({ userId, friendId });
+
     return { message: 'Successfully completed the operation.' };
   }
 }

@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 
 import { User } from './models/user.model';
 import { UserFollows } from './models/userFollows.model';
+import { UserFriends } from './models/userFriends.model';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { UserFollows } from './models/userFollows.model';
       database: process.env.DB_NAME,
       autoLoadModels: true,
       synchronize: true,
-      models: [User, UserFollows],
+      models: [User, UserFollows, UserFriends],
     }),
     UserModule,
   ],

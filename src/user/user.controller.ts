@@ -11,6 +11,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '../models/user.model';
 import { ApiFollowUserDocs } from './docs/follow-decorator';
+import { ApiFriendUserDocs } from './docs/friend-decorator';
 import { ApiCreateUserDocs } from './docs/users-decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
@@ -46,5 +47,15 @@ export class UserController {
     @Param('followerId', ParseIntPipe) followerId: number,
   ): Promise<any> {
     return this.userService.followUser(userId, followerId);
+  }
+
+  @Post(':userId/friends/:friendId')
+  @HttpCode(HttpStatus.OK)
+  @ApiFriendUserDocs()
+  async addFriendship(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('friendId', ParseIntPipe) friendId: number,
+  ): Promise<any> {
+    return this.userService.addFriend(userId, friendId);
   }
 }
