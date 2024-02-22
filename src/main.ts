@@ -1,10 +1,15 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { HttpException, HttpStatus, ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Sequelize } from 'sequelize-typescript';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const sequelize = app.get(Sequelize);
+  await sequelize.sync();
+
   app.enableCors(); // Just to allow swagger to work on localhost
 
   app.useGlobalPipes(
@@ -36,6 +41,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
   await app.listen(8080);
 }
 bootstrap();

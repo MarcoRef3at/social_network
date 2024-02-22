@@ -5,6 +5,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 
+import { User } from './models/user.model';
+import { UserFollows } from './models/userFollows.model';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,6 +23,7 @@ import { UserModule } from './user/user.module';
       database: process.env.DB_NAME,
       autoLoadModels: true,
       synchronize: true,
+      models: [User, UserFollows],
     }),
     UserModule,
   ],

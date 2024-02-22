@@ -4,42 +4,25 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
 } from '@nestjs/common';
-import {
-  ApiBadRequestResponse,
-  ApiInternalServerErrorResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { User } from '../models/user.model';
+import { ApiFollowUserDocs } from './docs/follow-decorator';
+import { ApiCreateUserDocs } from './docs/users-decorator';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserResponses } from './user-api-docs';
 import { UserService } from './user.service';
 
-@ApiTags('users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: CreateUserResponses.summary })
-  @ApiOkResponse({
-    description: CreateUserResponses.createUserSuccess.description,
-    schema: { example: CreateUserResponses.createUserSuccess.example },
-  })
-  @ApiBadRequestResponse({
-    description: CreateUserResponses.createUserBadRequest.description,
-    schema: { example: CreateUserResponses.createUserBadRequest.example },
-  })
-  @ApiInternalServerErrorResponse({
-    description: CreateUserResponses.createUserInternalServerError.description,
-    schema: {
-      example: CreateUserResponses.createUserInternalServerError.example,
-    },
-  })
+  @ApiTags('users')
+  @ApiCreateUserDocs()
   async create(@Body() createUserDto: CreateUserDto): Promise<any> {
     try {
       const user: User = await this.userService.createUser(createUserDto);
@@ -53,5 +36,15 @@ export class UserController {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
+  }
+
+  @Post(':userId/followers/:followerId')
+  @HttpCode(HttpStatus.OK)
+  @ApiFollowUserDocs()
+  async follow(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('followerId', ParseIntPipe) followerId: number,
+  ): Promise<any> {
+    return this.userService.followUser(userId, followerId);
   }
 }

@@ -1,10 +1,16 @@
-import { Column, DataType, Model, Table } from 'sequelize-typescript';
-import { UserInterface } from 'src/user/interface/user.interface';
+import {
+  BelongsToMany,
+  Column,
+  DataType,
+  Model,
+  Table,
+} from 'sequelize-typescript';
+import { UserFollows } from './userFollows.model';
 
 @Table({
   tableName: 'users',
 })
-export class User extends Model<User> implements UserInterface {
+export class User extends Model<User> {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
@@ -18,4 +24,10 @@ export class User extends Model<User> implements UserInterface {
     allowNull: false,
   })
   fullName: string;
+
+  @BelongsToMany(() => User, () => UserFollows, 'followerId', 'userId')
+  followings: User[];
+
+  @BelongsToMany(() => User, () => UserFollows, 'userId', 'followerId')
+  followers: User[];
 }
