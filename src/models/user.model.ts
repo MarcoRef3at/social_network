@@ -2,11 +2,13 @@ import {
   BelongsToMany,
   Column,
   DataType,
+  HasMany,
   Model,
   Table,
 } from 'sequelize-typescript';
 import { UserFollows } from './userFollows.model';
 import { UserFriends } from './userFriends.model';
+import { Post } from './post.model';
 
 @Table({
   tableName: 'users',
@@ -34,4 +36,7 @@ export class User extends Model<User> {
 
   @BelongsToMany(() => User, () => UserFriends, 'userId', 'friendId')
   friends: User[];
+
+  @HasMany(() => Post)
+  posts: Post[];
 }
