@@ -52,11 +52,17 @@ describe('PostController', () => {
     it('should call getVisiblePostsForUser on service with correct parameters', async () => {
       const userId = 1;
       const posts = [{ postId: 1, text: 'Post 1' }];
+      const req = {
+        pagination: { limit: 10, page: 1, offset: 0 },
+      };
 
       mockPostService.getVisiblePostsForUser.mockResolvedValue(posts);
 
-      expect(await controller.getWall(userId)).toEqual(posts);
-      expect(service.getVisiblePostsForUser).toHaveBeenCalledWith(userId);
+      expect(await controller.getWall(userId, req)).toEqual(posts);
+      expect(service.getVisiblePostsForUser).toHaveBeenCalledWith(
+        userId,
+        req.pagination,
+      );
     });
   });
 

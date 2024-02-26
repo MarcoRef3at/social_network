@@ -13,6 +13,7 @@ describe('PostService', () => {
     create: jest.fn(),
     findAll: jest.fn(),
     findOne: jest.fn(),
+    count: jest.fn(),
   };
 
   const mockUserRepository = {
@@ -78,9 +79,11 @@ describe('PostService', () => {
           id: 1,
           text: 'Test post',
           createdAt: new Date(),
-          user: { fullName: 'John Doe' },
+          author: { fullName: 'John Doe' },
         },
       ];
+      const totalRecords = mockPosts.length;
+      const pagination = { limit: 10, page: 1, offset: 0 };
       mockPostRepository.findAll.mockResolvedValue(mockPosts);
       mockUserRepository.findAll.mockResolvedValue([
         {
@@ -89,17 +92,27 @@ describe('PostService', () => {
           followings: [{ id: 3 }],
         },
       ]);
+      mockPostRepository.count.mockResolvedValue(totalRecords);
 
       const expectedPosts = mockPosts.map((post) => ({
         id: post.id,
         text: post.text,
         postedOn: post.createdAt,
-        userFullName: post.user.fullName,
+        userFullName: post.author.fullName,
       }));
 
-      await expect(service.getVisiblePostsForUser(userId)).resolves.toEqual(
-        expectedPosts,
-      );
+      const expectedResponse = {
+        data: expectedPosts,
+        pagination: {
+          currentPage: 1,
+          nextPage: null,
+          totalPages: 1,
+          totalRecords: 1,
+        },
+      };
+      await expect(
+        service.getVisiblePostsForUser(userId, pagination),
+      ).resolves.toEqual(expectedResponse);
     });
   });
 

@@ -75,7 +75,10 @@ export class PostService {
     return ids;
   }
 
-  async getVisiblePostsForUser(userId: number): Promise<any[]> {
+  async getVisiblePostsForUser(
+    userId: number,
+    pagination?: { limit: number; offset: number; page: number },
+  ): Promise<any> {
     const ids = await this.getAllowedIds(userId);
 
     const posts = await this.postModel.findAll({
@@ -87,16 +90,26 @@ export class PostService {
       include: [
         {
           model: User,
+          as: 'author',
           attributes: ['fullName'],
         },
       ],
+      ...pagination,
     });
-    return posts.map((post) => ({
+
+    const data = posts.map((post) => ({
       id: post.id,
       text: post.text,
       postedOn: post.createdAt,
-      userFullName: post.user.fullName,
+      userFullName: post.author.fullName,
     }));
+
+    const responsePagination = await this.getResponsePagination(
+      ids,
+      pagination,
+    );
+
+    return { data, pagination: responsePagination };
   }
 
   async likePost(userId: number, postId: number): Promise<any> {
@@ -142,5 +155,27 @@ export class PostService {
 
     await like.destroy();
     return { message: 'Like removed successfully.' };
+  }
+
+  private async getResponsePagination(
+    ids: number[],
+    pagination: { limit: number; offset: number; page: number },
+  ) {
+    const totalRecords = await this.postModel.count({
+      where: {
+        [Op.or]: [{ userId: { [Op.in]: ids } }, { visibility: 'public' }],
+      },
+    });
+
+    const currentPage = pagination.page || 1;
+    const totalPages = Math.ceil(totalRecords / (pagination.limit || 10));
+    const hasNextPage = currentPage < totalPages;
+    const nextPage = hasNextPage ? currentPage + 1 : null;
+    return {
+      currentPage,
+      nextPage,
+      totalPages,
+      totalRecords,
+    };
   }
 }

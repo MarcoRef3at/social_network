@@ -49,8 +49,8 @@ export class Post extends Model<Post> {
   })
   visibility: 'public' | 'private';
 
-  @BelongsTo(() => User)
-  user: User;
+  @BelongsTo(() => User, { as: 'author' })
+  author: User;
 
   @BelongsToMany(() => User, () => Like)
   likers: User[];

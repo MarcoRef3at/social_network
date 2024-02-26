@@ -1,11 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags,
   ApiParam,
+  ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
 
 const WallResponses = {
@@ -13,18 +13,20 @@ const WallResponses = {
   getUserWallSuccess: {
     description:
       'A list of all the posts made by the user, their friends, and people they follow, sorted by timestamp descending',
-    example: [
-      {
-        text: 'Hello world!',
-        postedOn: '2022-08-22T01:02:03.456Z',
-        userFullName: 'John Doe',
-      },
-    ],
-  },
-  getUserWallBadRequest: {
-    description: 'The timeline request was invalid',
     example: {
-      message: 'Bad Request',
+      data: [
+        {
+          text: 'Hello world!',
+          postedOn: '2022-08-22T01:02:03.456Z',
+          userFullName: 'John Doe',
+        },
+      ],
+      pagination: {
+        currentPage: 1,
+        nextPage: 2,
+        totalPages: 2,
+        totalRecords: 3,
+      },
     },
   },
   getUserWallInternalServerError: {
@@ -47,10 +49,6 @@ export function ApiWallDocs() {
       description: WallResponses.getUserWallSuccess.description,
       schema: { example: WallResponses.getUserWallSuccess.example },
     }),
-    ApiBadRequestResponse({
-      description: WallResponses.getUserWallBadRequest.description,
-      schema: { example: WallResponses.getUserWallBadRequest.example },
-    }),
     ApiInternalServerErrorResponse({
       description: WallResponses.getUserWallInternalServerError.description,
       schema: {
@@ -62,6 +60,20 @@ export function ApiWallDocs() {
       required: true,
       description: 'ID of the user whose wall is being requested',
       type: 'integer',
+    }),
+    ApiQuery({
+      name: 'page',
+      required: false,
+      type: 'number',
+      description:
+        'The page number to retrieve (default value is 1 if not provided)',
+    }),
+    ApiQuery({
+      name: 'limit',
+      required: false,
+      type: 'number',
+      description:
+        'The number of items per page (default value is 10 if not provided)',
     }),
   );
 }

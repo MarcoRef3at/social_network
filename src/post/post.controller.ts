@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Req,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -38,8 +39,14 @@ export class PostController {
 
   @Get('walls/:userId')
   @ApiWallDocs()
-  async getWall(@Param('userId', ParseIntPipe) userId: number): Promise<any> {
-    return await this.postService.getVisiblePostsForUser(userId);
+  async getWall(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Req() req,
+  ): Promise<any> {
+    return await this.postService.getVisiblePostsForUser(
+      userId,
+      req.pagination,
+    );
   }
 
   @Post(':postId/like/:userId')

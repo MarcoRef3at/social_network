@@ -39,7 +39,6 @@ export class UserService {
       const user = await this.userModel.create(createUserDto);
       return { userId: user.id };
     } catch (error) {
-      console.log('error:', error)
       throw new HttpException(
         {
           status: HttpStatus.INTERNAL_SERVER_ERROR,
