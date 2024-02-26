@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { UserFollows } from 'src/models/userFollows.model';
+import { UserFollows } from '../models/userFollows.model';
 import { User } from '../models/user.model';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserFriends } from 'src/models/userFriends.model';
+import { UserFriends } from '../models/userFriends.model';
 
 @Injectable()
 export class UserService {
@@ -34,9 +34,20 @@ export class UserService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const user = new this.userModel(createUserDto);
-    return user.save();
+  async createUser(createUserDto: CreateUserDto): Promise<{ userId: number }> {
+    try {
+      const user = await this.userModel.create(createUserDto);
+      return { userId: user.id };
+    } catch (error) {
+      console.log('error:', error)
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Internal Server Error',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async followUser(userId: number, followerId: number): Promise<any> {

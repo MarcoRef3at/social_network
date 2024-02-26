@@ -2,14 +2,12 @@ import {
   Body,
   Controller,
   HttpCode,
-  HttpException,
   HttpStatus,
   Param,
   ParseIntPipe,
-  Post,
+  Post
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { User } from '../models/user.model';
 import { ApiFollowUserDocs } from './docs/follow-decorator';
 import { ApiFriendUserDocs } from './docs/friend-decorator';
 import { ApiCreateUserDocs } from './docs/users-decorator';
@@ -24,25 +22,14 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiTags('users')
   @ApiCreateUserDocs()
-  async create(@Body() createUserDto: CreateUserDto): Promise<any> {
-    try {
-      const user: User = await this.userService.createUser(createUserDto);
-      return { userId: user.id };
-    } catch (error) {
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: 'Internal Server Error',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  create(@Body() createUserDto: CreateUserDto): Promise<any> {
+    return this.userService.createUser(createUserDto);
   }
 
   @Post(':userId/followers/:followerId')
   @HttpCode(HttpStatus.OK)
   @ApiFollowUserDocs()
-  async follow(
+  follow(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('followerId', ParseIntPipe) followerId: number,
   ): Promise<any> {
@@ -52,7 +39,7 @@ export class UserController {
   @Post(':userId/friends/:friendId')
   @HttpCode(HttpStatus.OK)
   @ApiFriendUserDocs()
-  async addFriendship(
+  addFriendship(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('friendId', ParseIntPipe) friendId: number,
   ): Promise<any> {
