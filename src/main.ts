@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Sequelize } from 'sequelize-typescript';
 import { AppModule } from './app.module';
+import { PaginationMiddleware } from './middleware/pagination.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,6 +11,7 @@ async function bootstrap() {
   const sequelize = app.get(Sequelize);
   await sequelize.sync();
 
+  app.use(new PaginationMiddleware().use);
   app.enableCors(); // Just to allow swagger to work on localhost
 
   app.useGlobalPipes(
