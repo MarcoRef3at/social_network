@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { User } from 'src/models/user.model';
+import { User } from '../models/user.model';
 import { Post } from '../models/post.model';
-import { Like } from 'src/models/like.model';
+import { Like } from '../models/like.model';
 
 @Injectable()
 export class PostService {
@@ -17,6 +17,8 @@ export class PostService {
     private postModel: typeof Post,
     @InjectModel(User)
     private userModel: typeof User,
+    @InjectModel(Like)
+    private likeModel: typeof Like,
   ) {}
 
   async createPost(
@@ -25,13 +27,11 @@ export class PostService {
     visibility: 'public' | 'private',
   ): Promise<Post> {
     try {
-      const post = new this.postModel({
+      return await this.postModel.create({
         userId,
         text,
         visibility,
       });
-
-      return await post.save();
     } catch (error) {
       if (error.name === 'SequelizeForeignKeyConstraintError') {
         throw new BadRequestException(`User with ID ${userId} does not exist.`);
@@ -100,21 +100,26 @@ export class PostService {
   }
 
   async likePost(userId: number, postId: number): Promise<any> {
-    const post = await Post.findOne({ where: { id: postId } });
-    if (post.visibility === 'private' && post.userId !== userId) {
+    const post = await this.postModel.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new BadRequestException('Post does not exist');
+    }
+    if (post?.visibility === 'private' && post?.userId !== userId) {
       const visiblePostsIds = await this.getAllowedIds(userId);
       if (!visiblePostsIds.includes(postId)) {
         throw new BadRequestException('Post is not visible to the user.');
       }
     }
 
-    const alreadyLiked = await Like.findOne({ where: { userId, postId } });
+    const alreadyLiked = await this.likeModel.findOne({
+      where: { userId, postId },
+    });
     if (alreadyLiked) {
       throw new BadRequestException('User has already liked this post.');
     }
 
     try {
-      await Like.create({ userId, postId });
+      await this.likeModel.create({ userId, postId });
       return { message: 'Post liked successfully.' };
     } catch (error) {
       if (error.name === 'SequelizeForeignKeyConstraintError') {
@@ -130,7 +135,7 @@ export class PostService {
   }
 
   async unlikePost(userId: number, postId: number): Promise<any> {
-    const like = await Like.findOne({ where: { userId, postId } });
+    const like = await this.likeModel.findOne({ where: { userId, postId } });
     if (!like) {
       throw new BadRequestException('Like does not exist.');
     }
