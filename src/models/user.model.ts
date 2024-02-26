@@ -9,6 +9,7 @@ import {
 import { UserFollows } from './userFollows.model';
 import { UserFriends } from './userFriends.model';
 import { Post } from './post.model';
+import { Like } from './like.model';
 
 @Table({
   tableName: 'users',
@@ -39,4 +40,7 @@ export class User extends Model<User> {
 
   @HasMany(() => Post)
   posts: Post[];
+
+  @BelongsToMany(() => Post, () => Like)
+  likedPosts: Post[];
 }

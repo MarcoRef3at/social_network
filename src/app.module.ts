@@ -10,6 +10,7 @@ import { UserFollows } from './models/userFollows.model';
 import { UserFriends } from './models/userFriends.model';
 import { PostModule } from './post/post.module';
 import { Post } from './models/post.model';
+import { Like } from './models/like.model';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { Post } from './models/post.model';
       database: process.env.DB_NAME,
       autoLoadModels: true,
       synchronize: true,
-      models: [User, UserFollows, UserFriends, Post],
+      models: [User, UserFollows, UserFriends, Post, Like],
     }),
     UserModule,
     PostModule,

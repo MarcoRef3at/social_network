@@ -1,5 +1,6 @@
 import {
   BelongsTo,
+  BelongsToMany,
   Column,
   DataType,
   ForeignKey,
@@ -7,6 +8,7 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { User } from './user.model';
+import { Like } from './like.model';
 
 @Table({
   tableName: 'posts',
@@ -34,6 +36,13 @@ export class Post extends Model<Post> {
   text: string;
 
   @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  })
+  likesCount: number;
+
+  @Column({
     type: DataType.ENUM,
     values: ['public', 'private'],
     allowNull: false,
@@ -42,4 +51,7 @@ export class Post extends Model<Post> {
 
   @BelongsTo(() => User)
   user: User;
+
+  @BelongsToMany(() => User, () => Like)
+  likers: User[];
 }
